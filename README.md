@@ -13,44 +13,44 @@
 
 ### Initialization State:
 - Cash: 1000000
-- Stocks Universe: Top 30 SP500 Stocks in Market Capitalization
+- Stocks Universe: Stocks selected from the selection procedure
 
 ### Trading Strategy for each stock:
 
-- If Stop-Loss hit or target hit or RSI(7) < 30:
-    - Close all short positions
-    - Execute a buy order at current price and specified volume
+- For existing positions, if target hit:
+    - Exit existing positions
 
-- If Stop-Loss hit or target hit or RSI(7) > 70:
-    - Close all long positions
+- If RSI(7) > 70:
     - Execute a short order at current price and specified volume
 
+- If RSI(7) < 30:
+    - Execute a buy order at current price and specified volume
 
-### Optimal Portfolio Parameters:
 
-## Optimization Procedure
+## Optimal Portfolio Parameters:
+
+### Optimization Procedure
 - Grid search with parameters:
 (1) Max active positions per stock
 (2) Stop Loss
 (3) Profit Target
 (4) Quantity of shares traded per order
 
-- Aim to obtain parameters with positive P&L, best Sharpe Ratio and > 0.6 hit rate.
+- Aim to obtain parameters with positive P&Lm, low max drawdown and best Sharpe Ratio.
 
 
-## Optimized Parameters
+### Optimized Parameters
 - Stop-Loss: None
-- Profit-Taking Level: None
-- Amount of shares per order: 20
-- Maximum number of opened positions allowed: 30 * 10
+- Profit-Taking Level: 6%
+- Amount of shares per order: 10
+- Maximum number of opened positions allowed: 50 * 16
 
 
 ### Result Statistics:
-- Net Profit: $452157
-- Annualized Return: 5.02%
-- Sharpe Ratio: 0.0794
-- Max Drawdown: 0.804
-- Hit Rate: 0.642
+- Net Profit: $300300
+- Annualized Return: 15.4%
+- Sharpe Ratio: 1.17
+- Max Drawdown: 0.248
 
 
 

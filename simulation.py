@@ -6,16 +6,10 @@ import numpy as np
 
 def grid_search_optimizer():
     
-    stop_losses = [10000]
+    stop_losses = [10000, 0.015, 0.01, 0.02, 0.025, 0.03]
     max_active_positions = [6, 8, 10, 12, 14, 16]
     quantities = [15, 25, 35, 10, 20, 30]
     targets = [0.03, 0.02, 0.04, 0.05, 0.06]
-    
-    
-    #stop_losses = [10000]
-    #max_active_positions = [10, 20]
-    #quantities = [10]
-    #targets = [0.03]
     
     # Results of the grid search
     metrics = pd.DataFrame(columns=['Stop Loss', 'Quantity Shares Traded', 'Max Active Positions', 'Target',
@@ -29,14 +23,10 @@ def grid_search_optimizer():
                     portfolio = PortfolioTrader(quantity=quantity, max_active_positions=50 *max_active_position, stop_loss=stop_loss, target=target)
                     portfolio.simulate()
                     portfolio.calculate_metrics()
-                    #print(portfolio.metrics)
-                    print(portfolio.metrics.head(1))
+                    #print(portfolio.metrics.head(1))
                 
                     metrics = pd.concat([metrics, portfolio.metrics], axis=0, ignore_index=True)
-                    #print(metrics)
-                    
-                    
-                    
+ 
                 
     # Filter out the results with negative PnL and sort by Sharpe Ratio
     #print(metrics)
@@ -56,7 +46,7 @@ def grid_search_optimizer():
                 
 
 if __name__ == '__main__':
-    #'''
+    '''
     print("Starting Grid Search Optimizer")
     stop_loss, quantity, max_active_positions, target = grid_search_optimizer()
     
@@ -65,13 +55,13 @@ if __name__ == '__main__':
     print("Quantity Shares Traded: ", quantity)
     print("Max Active Positions: ", max_active_positions)
     print("Target: ", target)
-    #'''
+    '''
     #Grid Search Optimizer for the best parameters, max_active_positions and stop_loss
 
-    portfolio = PortfolioTrader(quantity=quantity, max_active_positions=50 * max_active_positions, stop_loss=stop_loss,
-                                target=target)
-    #portfolio = PortfolioTrader(quantity=10, max_active_positions=50 * 6, stop_loss=10000,
-    #                            target=0.03)
+    #portfolio = PortfolioTrader(quantity=quantity, max_active_positions=50 * max_active_positions, stop_loss=stop_loss,
+    #                            target=target)
+    portfolio = PortfolioTrader(quantity=10, max_active_positions=50 * 16, stop_loss=10000,
+                                target=0.06)
     portfolio.simulate()
     portfolio.calculate_metrics()
     print(portfolio.metrics)

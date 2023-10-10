@@ -3,112 +3,14 @@ import pandas as pd
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
-from sklearn.model_selection import TimeSeriesSplit
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, BatchNormalization, Conv1D, Flatten, MaxPooling1D, LSTM
-from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
-from keras.models import load_model
-from sklearn.preprocessing import MinMaxScaler
-import yfinance as yf
 import datetime
 import matplotlib.pyplot as plt
-import pandas_ta as ta
-import seaborn as sns
 import metrics as metrics
-from collections import OrderedDict, defaultdict
 
 #import from other files
 from position import Position
+from metadata import ticker_list
 
-"""
-ticker_list = [
-    'AAPL',
-    'MSFT',
-    'AMZN',
-    'GOOGL',
-    'NVDA',
-    'TSLA',
-    'META',
-    'GOOG',
-    'XOM',
-    'UNH',
-    'JPM',
-    'LLY',
-    'JNJ',
-    'V',
-    'PG',
-    'AVGO',
-    'MA',
-    'HD',
-    'CVX',
-    'ABBV',
-    'MRK',
-    'COST',
-    'PEP',
-    'WMT',
-    'ADBE',
-    'CSCO',
-    'KO',
-    'CRM',
-    'TMO',
-    'ACN'
-]
-
-"""
-
-#['WDC', 'UNP', 'MOS', 'SPG', 'WAB', 'TRGP', 'URI', 'TPR', 'WYNN',
-#               'BA', 'CI', 'DIS', 'TDG', 'VRTX', 'TMO', 'ULTA', 'HD', 'WHR', 'GWW', 'GS']
-
-ticker_list =  ['SO',
- 'ZTS',
- 'WMT',
- 'SYF',
- 'PG',
- 'CLX',
- 'HSY',
- 'XEL',
- 'WEC',
- 'VZ',
- 'KO',
- 'SYY',
- 'TGT',
- 'SJM',
- 'KR',
- 'SRE',
- 'WBA',
- 'XYL',
- 'WELL',
- 'WM',
- 'UPS',
- 'TJX',
- 'TSN',
- 'VTR',
- 'TRV',
- 'SNPS',
- 'SHW',
- 'HD',
- 'YUM',
- 'PGR',
- 'UNH',
- 'SPG',
- 'ZBH',
- 'SYK',
- 'VRSN',
- 'VFC',
- 'ALL',
- 'NOW',
- 'V',
- 'SBUX',
- 'GWW',
- 'EL',
- 'TRGP',
- 'CI',
- 'BA',
- 'TDG',
- 'ULTA',
- 'DIS',
- 'WBD',
- 'TSCO']
 
 class PortfolioTrader():
 
@@ -116,7 +18,7 @@ class PortfolioTrader():
         
         
         print("Initializing PortfolioTrader...")
-        self.models_dict = {ticker: pd.read_csv("ML Models/stock_selection/data/" + ticker + ".csv",
+        self.models_dict = {ticker: pd.read_csv("./stock_selection/data/" + ticker + ".csv",
                            index_col="Date", parse_dates=True) for ticker in ticker_list}
         self.logged_positions = {ticker: []
                                  for ticker in ticker_list}  # : Ticker: List[Position]
@@ -221,7 +123,6 @@ class PortfolioTrader():
                     position.record_price_update(self.current_date, current_price)
                 
                 if position.is_active and (position.stop_loss_hit() or position.target_hit()) and position.type == "long": 
-                #or (position.is_active and position.type == "long") and signal == -1:
                     position.exit(self.current_date, current_price)
                     self.current_positions -= 1
 
@@ -240,7 +141,6 @@ class PortfolioTrader():
                         self.hit_rate['fail'] += 1
 
                 elif position.is_active and (position.stop_loss_hit() or position.target_hit()) and position.type == "short": 
-                #or (position.is_active and position.type == "short" and signal == 1):
                     
                     if self.cash > self.quantity * current_price:
                         position.exit(self.current_date, current_price)
@@ -274,7 +174,6 @@ class PortfolioTrader():
                 
                 if canOpen:
                     
-                    current_stock_allocation = self.stock_allocation[ticker]
                     #Open new Position and update position logs
                     position = Position(
                         ticker, self.current_date, "long", current_price, self.quantity, self.stop_loss, self.target)
@@ -286,18 +185,15 @@ class PortfolioTrader():
                     #Update Cash and stock allocation
                     current_cash -= self.quantity * current_price * \
                         (1 + self.percent_slippage) + self.trade_fee
-                    current_stock_allocation += self.quantity * \
+                    self.stock_allocation[ticker] += self.quantity * \
                         current_price * (1 + self.percent_slippage)
-                        
-                    self.stock_allocation[ticker] = current_stock_allocation
-            
+                                    
             elif signal == -1:
                 canShort = self.check_to_open_short_positions(
                     ticker, current_price)
                 
                 if canShort:
                     
-                    current_stock_allocation = self.stock_allocation[ticker]
                     #Open new Position and update position logs
                     position = Position(
                         ticker, self.current_date, "short", current_price, self.quantity, self.stop_loss, self.target)
@@ -306,18 +202,14 @@ class PortfolioTrader():
                     self.current_positions += 1
                     
                     #Update Cash and stock allocation
-                    current_cash += self.quantity * current_price * \
-                        (1 - self.percent_slippage) - self.trade_fee
-                    current_stock_allocation += self.quantity * \
+                    current_cash += self.quantity * current_price * (1 - self.percent_slippage) - self.trade_fee
+                    self.stock_allocation[ticker] += self.quantity * \
                         current_price * (1 - self.percent_slippage)
-                    self.stock_allocation[ticker] = current_stock_allocation
         
         #Update daily PnL
         self.cash = current_cash   
         self.record_PNL(self.current_date, day_PnL)
         
-        #print(f"Current date: {self.current_date} + PnL: {day_PnL}")
-        #print(f"EOD Positions: {self.current_positions}")
                     
     def simulate(self):
         
@@ -412,9 +304,6 @@ class PortfolioTrader():
         max_drawdown = metrics.calculate_max_drawdown(cash_history)
 
         # Add to metrics data frame
-
-        # ['Stop Loss', 'Quantity Shares Traded', 'Max Active Positions',
-        #                                   'Sharpe Ratio', 'Max Drawdown', 'Annualized return']
         self.metrics = pd.concat([self.metrics, pd.DataFrame({'Stop Loss': [self.stop_loss], 
                                                               'Quantity Shares Traded': [self.quantity], 
                                                               'Max Active Positions': [self.max_active_positions / 50],
@@ -436,9 +325,7 @@ class PortfolioTrader():
         
         # Calculate Max Drawdown
         print(f"Max Drawdown: {self.metrics['Max Drawdown'].iloc[0]}")
-        
-        # Calculate Sortino Ratio
-                
+                        
         # Hit Rate
         print(f"Hit Rate: {self.hit_rate['success'] / (self.hit_rate['success'] + self.hit_rate['fail'])}")
         
