@@ -52,5 +52,11 @@
 - Sharpe Ratio: 1.17
 - Max Drawdown: 0.248
 
+### Cash Over Time
+![alt text](https://github.com/yinkiatho/Quantmatter-Proj/main/Pictures/cot.png)
+
+
+### Cumulative P&L Over Time
+![alt text](https://github.com/yinkiatho/Quantmatter-Proj/main/Pictures/cumpnl.png)
 
 

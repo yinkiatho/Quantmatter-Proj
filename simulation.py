@@ -52,7 +52,7 @@ if __name__ == '__main__':
     
     print("Best Parameters Found: ")
     print("Stop Loss: ", stop_loss)
-    print("Quantity Shares Traded: ", quantity)
+    print("Quantity Shares Traded: ", quantity) 
     print("Max Active Positions: ", max_active_positions)
     print("Target: ", target)
     '''
