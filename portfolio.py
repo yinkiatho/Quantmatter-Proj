@@ -130,7 +130,7 @@ class PortfolioTrader():
                     self.stock_allocation[ticker] -= position.last_price * \
                         position.shares
             
-                    # Update cash
+                    # Update cash   
                     current_cash += position.last_price * position.shares - self.trade_fee                    
                     day_PnL += position.return_value
                     
